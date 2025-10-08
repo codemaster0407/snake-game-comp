@@ -66,23 +66,23 @@ def get_turn_direction(snake_head: tuple, snake_direction: str, best_move: tuple
     
 def check_body_overlap(neighboring_points: list, body_coords: list, wall_coords: list):
     """Counts how many of a point's neighbors are occupied by the snake's body."""
-    return sum(1 for pt in neighboring_points if pt in body_coords)
+    return sum(1 for pt in neighboring_points if (pt in body_coords or pt in wall_coords))
 
 
 
 def find_next_move(grid_height, grid_width, food, walls, score, my_snake_direction, my_snake_body, enemy_snakes):
     nbrs = find_neighbors(my_snake_body[0], my_snake_body, list(walls), my_snake_direction, grid_height, grid_width)
   
-    print(f'MY SNAKE HEAD IS AT : {my_snake_body[0]}')
 
     fruit_coords = list(food)[0]
     
     move_scores = {}
     for move in nbrs:
         if move != None:
+            overlap = check_body_overlap(find_neighbors(move, my_snake_body, list(walls), my_snake_direction, grid_height, grid_width), my_snake_body, list(walls))
             move_scores[move] = {
                 'dist': manhattan_distance.manhattan_distance(move, fruit_coords),
-                'overlap_factor': check_body_overlap(find_neighbors(move, my_snake_body, list(walls), my_snake_direction, grid_height, grid_width), my_snake_body, list(walls))
+                'overlap_factor': overlap
             }
 
 
