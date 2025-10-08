@@ -38,7 +38,7 @@ def myAI(state: GameState) -> Turn:
     # ======================================
     # =         Your Code Goes Here        =
     # ======================================
-
+    print('Done')
     return random.choice(list(Turn))
 
     # ======================================
