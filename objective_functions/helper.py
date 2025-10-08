@@ -88,7 +88,7 @@ def check_body_overlap(neighboring_points: list, body_coords: list, wall_coords:
     
     if len(neighboring_points) == 0:
         return 0
-    return overlap / len(neighboring_points)
+    return overlap / (len(neighboring_points) + len(wall_coords) + len(enemy_snakes))
 
     
 
