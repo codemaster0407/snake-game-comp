@@ -1,7 +1,7 @@
 import random
 from collections import deque
 from snake.logic import GameState, Turn, Snake, Direction
-
+from objective_functions import helper
 """
 Your mission, should you choose to accept it, is to write the most cracked snake AI possible.
 
@@ -35,10 +35,18 @@ def myAI(state: GameState) -> Turn:
     left = my_snake.get_next_head(Turn.LEFT)
     right = my_snake.get_next_head(Turn.RIGHT)
 
+    direction = helper.find_next_move(grid_height, grid_width, food, walls, score, my_snake_direction, my_snake_body, enemy_snakes)
+    
+    if direction == 'straight':
+        return Turn.STRAIGHT
+    elif direction == 'left':
+        return Turn.LEFT 
+    else:
+        return Turn.RIGHT
     # ======================================
     # =         Your Code Goes Here        =
     # ======================================
-    print('Done')
+   
     return random.choice(list(Turn))
 
     # ======================================
