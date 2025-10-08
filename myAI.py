@@ -35,11 +35,12 @@ def myAI(state: GameState) -> Turn:
     left = my_snake.get_next_head(Turn.LEFT)
     right = my_snake.get_next_head(Turn.RIGHT)
 
-    direction = helper.find_next_move(grid_height, grid_width, food, walls, score, my_snake_direction, my_snake_body, enemy_snakes)
-    
-    if direction == 'straight':
+    next_move = helper.find_next_move(grid_height, grid_width, food, walls, score, my_snake_direction, my_snake_body, enemy_snakes)
+    if next_move == (0,0):
+        return random.choice(list(Turn))
+    if straight == next_move:
         return Turn.STRAIGHT
-    elif direction == 'left':
+    elif left == next_move:
         return Turn.LEFT 
     else:
         return Turn.RIGHT
@@ -47,7 +48,7 @@ def myAI(state: GameState) -> Turn:
     # =         Your Code Goes Here        =
     # ======================================
    
-    return random.choice(list(Turn))
+    # return random.choice(list(Turn))
 
     # ======================================
     # =       Try out some examples!       =

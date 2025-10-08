@@ -2,21 +2,24 @@ from objective_functions import manhattan_distance
 
 
 def find_neighbors(head_coords, body_coords, walls_coords,snake_direction, grid_height, grid_width):
+   
+    
     x, y = head_coords
-    neighbors = [
-        (x - 1, y) if x-1 >=0 else None,  # Left
-        (x + 1, y) if x+1 < grid_width else None,  # Right
-        (x, y + 1) if y+1< grid_height else None,  # Up
-        (x,y - 1) if y-1 >=0 else None  #Down
+    potential_neighbors = [
+        (x - 1, y) if x - 1 >= 0 else None,      # Left
+        (x + 1, y) if x + 1 < grid_width else None, # Right
+        (x, y + 1) if y + 1 < grid_height else None, # Up
+        (x, y - 1) if y - 1 >= 0 else None      # Down
     ]
     
-    for neighbor in neighbors:
-        if neighbor in body_coords:
-            neighbors.remove(neighbor)
-    if None in neighbors:
-        neighbors.remove(None)
+    # Use a list comprehension for a safe and clean filter
+    valid_neighbors = [
+        n for n in potential_neighbors 
+        if n is not None and (n not in body_coords and n not in walls_coords)
+    ]
 
-    return neighbors
+    return valid_neighbors
+
 
 
 
@@ -82,21 +85,24 @@ def find_next_move(grid_height, grid_width, food, walls, score, my_snake_directi
                 'overlap_factor': check_body_overlap(find_neighbors(move, my_snake_body, list(walls), my_snake_direction, grid_height, grid_width), my_snake_body, list(walls))
             }
 
-    direction_dict = {
-        'Direction.DOWN' : f'DOWN', 
-        'Direction.UP' : 'UP', 
-        'Direction.RIGHT' : 'RIGHT', 
-        'Direction.LEFT' : 'LEFT'
-    }
 
-    snake_direction = direction_dict[str(my_snake_direction)]
-    print('Direction of snake :', snake_direction)
-    best_move =  min(move_scores, key=lambda k: (move_scores[k]['dist']))
-    print(f'BEST MOVE : {best_move}')
-    direction = get_turn_direction(my_snake_body[0], snake_direction, best_move)
-    print(f'Direction is : {direction}')
     
-    return direction 
+    
+    keys_to_pop = []
+    for key in move_scores.keys():
+        if move_scores[key]['overlap_factor'] > 2:
+            keys_to_pop.append(key)
+
+
+    if len(keys_to_pop) != len(move_scores.keys()):
+        for key in keys_to_pop:
+            move_scores.pop(key) 
+    # Return the key (the coordinate) with the minimum (distance, overlap) tuple
+    try:
+        return min(move_scores, key=lambda k: (move_scores[k]['dist'], move_scores[k]['overlap_factor']))
+    
+    except:
+        return (0,0)
 
 
 
