@@ -27,7 +27,14 @@ def myAI(state: GameState) -> Turn:
     my_snake_direction: Direction = Direction(state.snake.direction)
     my_snake_body: list = list(state.snake.body)
     enemy_snakes = state.enemies
+    snakes_list = []
 
+    
+    for snake in enemy_snakes:
+        snakes_list.append(list(snake.body))
+    # print(snakes_list)
+
+    
     # you may also find the get_next_head() method of the Snake class useful!
     # this tells you what position the snake's head will end up in for each of the moves
     # you can then check for collisions, food etc
@@ -35,7 +42,7 @@ def myAI(state: GameState) -> Turn:
     left = my_snake.get_next_head(Turn.LEFT)
     right = my_snake.get_next_head(Turn.RIGHT)
 
-    next_move = helper.find_next_move(grid_height, grid_width, food, walls, score, my_snake_direction, my_snake_body, enemy_snakes)
+    next_move = helper.find_next_move(grid_height, grid_width, food, walls, score, my_snake_direction, my_snake_body, snakes_list)
     if next_move == (0,0):
         return random.choice(list(Turn))
     if straight == next_move:

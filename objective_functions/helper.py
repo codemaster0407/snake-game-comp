@@ -1,7 +1,7 @@
 from objective_functions import manhattan_distance
 
 
-def find_neighbors(head_coords, body_coords, walls_coords,snake_direction, grid_height, grid_width):
+def find_neighbors(head_coords, body_coords, walls_coords,snake_direction, grid_height, grid_width, enemy_snakes):
    
     
     x, y = head_coords
@@ -13,10 +13,19 @@ def find_neighbors(head_coords, body_coords, walls_coords,snake_direction, grid_
     ]
     
     # Use a list comprehension for a safe and clean filter
+    long_snake_list = []
+    for snake in enemy_snakes:
+        
+        long_snake_list.extend(snake)
+
+    long_snake_list = list(set(long_snake_list))
     valid_neighbors = [
         n for n in potential_neighbors 
-        if n is not None and (n not in body_coords and n not in walls_coords)
+        if n is not None and (n not in body_coords and n not in walls_coords and n not in long_snake_list )
     ]
+
+
+    
 
     return valid_neighbors
 
@@ -71,7 +80,9 @@ def check_body_overlap(neighboring_points: list, body_coords: list, wall_coords:
 
 
 def find_next_move(grid_height, grid_width, food, walls, score, my_snake_direction, my_snake_body, enemy_snakes):
-    nbrs = find_neighbors(my_snake_body[0], my_snake_body, list(walls), my_snake_direction, grid_height, grid_width)
+
+
+    nbrs = find_neighbors(my_snake_body[0], my_snake_body, list(walls), my_snake_direction, grid_height, grid_width, enemy_snakes)
   
 
     fruit_coords = list(food)[0]
@@ -79,7 +90,7 @@ def find_next_move(grid_height, grid_width, food, walls, score, my_snake_directi
     move_scores = {}
     for move in nbrs:
         if move != None:
-            overlap = check_body_overlap(find_neighbors(move, my_snake_body, list(walls), my_snake_direction, grid_height, grid_width), my_snake_body, list(walls))
+            overlap = check_body_overlap(find_neighbors(move, my_snake_body, list(walls), my_snake_direction, grid_height, grid_width, enemy_snakes), my_snake_body, list(walls) )
             move_scores[move] = {
                 'dist': manhattan_distance.manhattan_distance(move, fruit_coords),
                 'overlap_factor': overlap
