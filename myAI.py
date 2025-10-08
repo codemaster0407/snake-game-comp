@@ -29,7 +29,7 @@ def myAI(state: GameState) -> Turn:
     enemy_snakes = state.enemies
     snakes_list = []
 
-    
+
     for snake in enemy_snakes:
         snakes_list.append(list(snake.body))
     # print(snakes_list)
@@ -42,6 +42,7 @@ def myAI(state: GameState) -> Turn:
     left = my_snake.get_next_head(Turn.LEFT)
     right = my_snake.get_next_head(Turn.RIGHT)
 
+    
     next_move = helper.find_next_move(grid_height, grid_width, food, walls, score, my_snake_direction, my_snake_body, snakes_list)
     if next_move == (0,0):
         return random.choice(list(Turn))

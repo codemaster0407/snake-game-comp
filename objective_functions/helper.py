@@ -78,6 +78,18 @@ def check_body_overlap(neighboring_points: list, body_coords: list, wall_coords:
     return sum(1 for pt in neighboring_points if (pt in body_coords or pt in wall_coords))
 
 
+def find_best_fruit(head_coords: tuple, fruit_coords_list: list):
+    least_length = manhattan_distance.manhattan_distance(head_coords=head_coords, fruit_coords=fruit_coords_list[0])
+    best_fruit = fruit_coords_list[0]
+    for coords in fruit_coords_list:
+        new_length = manhattan_distance.manhattan_distance(head_coords = head_coords, fruit_coords=coords)
+        if new_length < least_length:
+            least_length = new_length 
+            best_fruit = coords 
+    
+    return best_fruit 
+
+
 
 def find_next_move(grid_height, grid_width, food, walls, score, my_snake_direction, my_snake_body, enemy_snakes):
 
@@ -85,7 +97,7 @@ def find_next_move(grid_height, grid_width, food, walls, score, my_snake_directi
     nbrs = find_neighbors(my_snake_body[0], my_snake_body, list(walls), my_snake_direction, grid_height, grid_width, enemy_snakes)
   
 
-    fruit_coords = list(food)[0]
+    fruit_coords = find_best_fruit(my_snake_body[0], list(food))
     
     move_scores = {}
     for move in nbrs:
