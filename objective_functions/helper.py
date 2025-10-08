@@ -75,12 +75,21 @@ def get_turn_direction(snake_head: tuple, snake_direction: str, best_move: tuple
     
 def check_body_overlap(neighboring_points: list, body_coords: list, wall_coords: list):
     """Counts how many of a point's neighbors are occupied by the snake's body."""
-    return sum(1 for pt in neighboring_points if (pt in body_coords or pt in wall_coords))
+    overlap = 0
+    for pt in neighboring_points:
+        if pt in body_coords:
+            overlap+=1
+        if pt in wall_coords:
+            overlap+=1
+    return overlap
+
+    
 
 
 def find_best_fruit(head_coords: tuple, fruit_coords_list: list):
     least_length = manhattan_distance.manhattan_distance(head_coords=head_coords, fruit_coords=fruit_coords_list[0])
     best_fruit = fruit_coords_list[0]
+
     for coords in fruit_coords_list:
         new_length = manhattan_distance.manhattan_distance(head_coords = head_coords, fruit_coords=coords)
         if new_length < least_length:
