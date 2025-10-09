@@ -177,8 +177,7 @@ def a_star_search(head_coords: tuple, fruit_coords: tuple, body_coords: list, wa
             if tentative_g_score < g_score[neighbor]:
                 came_from[neighbor] = current_coords
                 g_score[neighbor] = tentative_g_score
-                f_score[neighbor] = tentative_g_score -  manhattan_distance.manhattan_distance(neighbor, fruit_coords)
-                
+                f_score[neighbor] = tentative_g_score 
                 if neighbor not in [i[1] for i in open_set]:
                     heapq.heappush(open_set, (f_score[neighbor], neighbor))
     
