@@ -1,7 +1,7 @@
-from objective_functions import manhattan_distance
-
-
-def find_neighbors(head_coords, body_coords, walls_coords,snake_direction, grid_height, grid_width, enemy_snakes):
+from objective_functions import manhattan_distance, queue_class
+from global_tracker.best_path import NODE_QUEUE
+import heapq 
+def find_neighbors(head_coords, body_coords, walls_coords, grid_height, grid_width, enemy_snakes):
    
     
     x, y = head_coords
@@ -73,6 +73,119 @@ def get_turn_direction(snake_head: tuple, snake_direction: str, best_move: tuple
     else:
         return 'straight'
     
+
+
+# def breadth_first_search(head_coords: tuple, fruit_coords: tuple,  body_coords: list, wall_coords: list, enemy_snakes: list, grid_height: int, grid_width : int):
+#     # NODE_QUEUE
+#     NODE_QUEUE.dequeue_node()
+    
+#     neighbors = find_neighbors(head_coords=head_coords, body_coords=body_coords, walls_coords= wall_coords,
+#                                grid_height= grid_height, grid_width=grid_width, enemy_snakes= enemy_snakes)
+
+#     print(f'These are the neighbors')
+#     print(neighbors)
+    
+#     new_neighbors = [nbr for nbr in neighbors if nbr not in NODE_QUEUE.visited_nodes]
+    
+#     print(f'NEW NEIGHBORS : {new_neighbors}')
+#     mdist_list = np.array([manhattan_distance.manhattan_distance(nbr, fruit_coords) for nbr in new_neighbors])
+
+#     print(f'DISTANCE LIST : {mdist_list}')
+#     min_index = np.argmin(mdist_list)
+#     best_node = new_neighbors[min_index]
+
+#     print(f'BEST NODE : {best_node}')
+
+#     NODE_QUEUE.enqueue(best_node)
+    
+#     print(f' VISITED NODES : {NODE_QUEUE.visited_nodes}')
+#     if best_node == fruit_coords:
+#         NODE_QUEUE.visited_nodes = []
+#     else:
+#         NODE_QUEUE.visited_nodes.append(best_node)
+#     return best_node
+    
+
+    # #     node_queue.enqueue(nbr)
+    # # next_node = node_queue.dequeue_node()
+
+    # path = []
+
+    # # while next_node != fruit_coords:
+    # #     path.append(next_node)        
+    # #     neighbors = find_neighbors(head_coords = next_node, body_coords=body_coords, walls_coords= wall_coords,
+    # #                            grid_height= grid_height, grid_width=grid_width, enemy_snakes= enemy_snakes)
+        
+        
+    # #     mdist_list = [manhattan_distance.manhattan_distance(nbr, fruit_coords) for nbr in neighbors]
+        
+    # #     zipped_nbr_dist_list = zip(mdist_list, neighbors)
+
+    # #     sorted_pairs  = sorted(zipped_nbr_dist_list)
+    # #     sorted_neighbors = [neighbor for distance, neighbor in sorted_pairs]
+
+
+    # #     for nbr in sorted_neighbors:
+    # #         node_queue.enqueue(nbr)
+    # #     next_node = node_queue.dequeue_node()
+
+    # # print('BFS Ended')
+    # # return path 
+    
+
+def a_star_search(head_coords: tuple, fruit_coords: tuple, body_coords: list, wall_coords: list, enemy_snakes: list, grid_height: int, grid_width: int):
+  
+    all_obstacles = set(body_coords) | set(wall_coords)
+    for snake in enemy_snakes:
+        all_obstacles.update(snake)
+
+
+    open_set = [(0, head_coords)]
+    heapq.heapify(open_set)
+
+    came_from = {}
+    
+    g_score = { (x, y): float('inf') for x in range(grid_width) for y in range(grid_height) }
+    g_score[head_coords] = 0
+
+    f_score = { (x, y): float('inf') for x in range(grid_width) for y in range(grid_height) }
+    f_score[head_coords] = manhattan_distance.manhattan_distance(head_coords, fruit_coords)
+    
+    visited = set()
+
+    while open_set:
+        _, current_coords = heapq.heappop(open_set)
+
+        if current_coords == fruit_coords:
+            path = []
+            while current_coords in came_from:
+                path.append(current_coords)
+                current_coords = came_from[current_coords]
+            path.append(head_coords)
+            return path[::-1]
+
+        visited.add(current_coords)
+
+        neighbors = find_neighbors(current_coords, body_coords, wall_coords, grid_height, grid_width, enemy_snakes)
+        
+        for neighbor in neighbors:
+            if neighbor in visited:
+                continue
+
+            tentative_g_score = g_score[current_coords] + 1
+
+            if tentative_g_score < g_score[neighbor]:
+                came_from[neighbor] = current_coords
+                g_score[neighbor] = tentative_g_score
+                f_score[neighbor] = tentative_g_score + manhattan_distance.manhattan_distance(neighbor, fruit_coords)
+                
+                if neighbor not in [i[1] for i in open_set]:
+                    heapq.heappush(open_set, (f_score[neighbor], neighbor))
+    
+    return []
+        
+    
+        
 def check_body_overlap(neighboring_points: list, body_coords: list, wall_coords: list, enemy_snakes: list):
     """Counts how many of a point's neighbors are occupied by the snake's body."""
     overlap = 0
@@ -108,40 +221,29 @@ def find_best_fruit(head_coords: tuple, fruit_coords_list: list):
 
 
 def find_next_move(grid_height, grid_width, food, walls, score, my_snake_direction, my_snake_body, enemy_snakes):
-
-
-    nbrs = find_neighbors(my_snake_body[0], my_snake_body, list(walls), my_snake_direction, grid_height, grid_width, enemy_snakes)
+    # try:
+    best_fruit = find_best_fruit(my_snake_body[0], list(food))
+    head = my_snake_body[0]
+    
+    path = a_star_search(head, best_fruit, my_snake_body, 
+                         list(walls), enemy_snakes, grid_height, grid_width)
+    if path and len(path) > 1:
+        return path[1]
+    else:
   
+        neighbors = find_neighbors(head, my_snake_body, list(walls), grid_height, grid_width, enemy_snakes)
+        if neighbors:
+            return neighbors[0] 
+        else:
+            if my_snake_direction == 'UP':
+                return (head[0], head[1] + 1)
+            elif my_snake_direction == 'DOWN':
+                return (head[0], head[1] - 1)
+            elif my_snake_direction == 'LEFT':
+                return (head[0] - 1, head[1])
+            else: 
+                return (head[0] + 1, head[1])
 
-    fruit_coords = find_best_fruit(my_snake_body[0], list(food))
-    
-    move_scores = {}
-    for move in nbrs:
-        if move != None:
-            overlap = check_body_overlap(find_neighbors(move, my_snake_body, list(walls), my_snake_direction, grid_height, grid_width, enemy_snakes), my_snake_body, list(walls), enemy_snakes )
-            move_scores[move] = {
-                'dist': manhattan_distance.manhattan_distance(move, fruit_coords),
-                'overlap_factor': overlap
-            }
-
-
-    
-    
-    keys_to_pop = []
-    for key in move_scores.keys():
-        if move_scores[key]['overlap_factor'] > 2:
-            keys_to_pop.append(key)
-
-
-    if len(keys_to_pop) != len(move_scores.keys()):
-        for key in keys_to_pop:
-            move_scores.pop(key) 
-    # Return the key (the coordinate) with the minimum (distance, overlap) tuple
-    try:
-        return min(move_scores, key=lambda k: (move_scores[k]['dist'], move_scores[k]['overlap_factor']))
-    
-    except:
-        return (0,0)
 
 
 
