@@ -177,7 +177,7 @@ def a_star_search(head_coords: tuple, fruit_coords: tuple, body_coords: list, wa
             if tentative_g_score < g_score[neighbor]:
                 came_from[neighbor] = current_coords
                 g_score[neighbor] = tentative_g_score
-                f_score[neighbor] = tentative_g_score + manhattan_distance.manhattan_distance(neighbor, fruit_coords)
+                f_score[neighbor] = tentative_g_score - manhattan_distance.manhattan_distance(neighbor, fruit_coords)
                 
                 if neighbor not in [i[1] for i in open_set]:
                     heapq.heappush(open_set, (f_score[neighbor], neighbor))
@@ -233,7 +233,14 @@ def find_next_move(grid_height, grid_width, food, walls, score, my_snake_directi
   
         neighbors = find_neighbors(head, my_snake_body, list(walls), grid_height, grid_width, enemy_snakes)
         if neighbors:
-            return neighbors[0] 
+            min_overlap = 100
+            best_nbr = neighbors[0]
+            for nbr in neighbors:
+                internal_neighbors = find_neighbors(head, my_snake_body, walls, grid_height, grid_width, enemy_snakes)
+                overlap_score = check_body_overlap(internal_neighbors, my_snake_body, walls, enemy_snakes)
+                if overlap_score< min_overlap:
+                    best_nbr = nbr 
+            return best_nbr 
         else:
             if my_snake_direction == 'UP':
                 return (head[0], head[1] + 1)
