@@ -252,4 +252,3 @@ def find_next_move(grid_height, grid_width, food, walls, score, my_snake_directi
 
 
     
-    #PRINT COMMIT DIDNT TRIGER ACTION
